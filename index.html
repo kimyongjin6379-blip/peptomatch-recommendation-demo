@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>균주 맞춤 펩톤 추천 리포트 · PeptoMatch × Growth Curve</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+        }
+        .header-logo {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            max-height: 60px;
+            max-width: 120px;
+        }
+        .header h1 { color: #2c3e50; font-size: 2.3em; margin-bottom: 10px; }
+        .header .subtitle { color: #7f8c8d; font-size: 1.05em; }
+
+        .demo-banner {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 6px 16px;
+            background: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffcc80;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .stats-row {
+            display: flex; justify-content: center; gap: 30px;
+            margin-top: 20px; flex-wrap: wrap;
+        }
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 15px 30px; border-radius: 10px; text-align: center;
+        }
+        .stat-box .number { font-size: 2em; font-weight: bold; }
+        .stat-box .label { font-size: 0.9em; opacity: 0.9; }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .card h2 .badge-soft {
+            font-size: 0.5em;
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-left: 10px;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+
+        .strain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+        }
+        .strain-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.3s;
+            border-top: 4px solid #667eea;
+        }
+        .strain-card:hover { transform: translateY(-5px); }
+        .strain-card .code {
+            display: inline-block;
+            background: #2c3e50;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-family: 'Consolas', monospace;
+            margin-bottom: 8px;
+        }
+        .strain-card .name {
+            font-size: 1.15em;
+            font-weight: 700;
+            color: #2c3e50;
+            font-style: italic;
+            margin-bottom: 6px;
+        }
+        .strain-card .media {
+            color: #7f8c8d;
+            font-size: 0.85em;
+            margin-bottom: 14px;
+        }
+        .demand-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 0.92em;
+        }
+        .demand-label { color: #555; }
+        .bar-track {
+            display: inline-block;
+            width: 90px;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .bar-fill {
+            display: block;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+        .demand-val {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.85em;
+            font-family: 'Consolas', monospace;
+        }
+        .top-pick {
+            margin-top: 14px;
+            padding: 10px 12px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+        .top-pick strong { font-size: 1.05em; }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 1000px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+        .chart-container { min-height: 420px; }
+
+        .reason-list {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .reason-item {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            font-size: 0.9em;
+        }
+        .reason-item .strain-tag {
+            display: inline-block;
+            font-family: 'Consolas', monospace;
+            background: #2c3e50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            margin-right: 6px;
+        }
+        .reason-item .pep-tag {
+            color: #27ae60;
+            font-weight: 700;
+        }
+
+        .blend-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 0.95em;
+        }
+        .blend-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .blend-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .blend-table tr:hover { background: #f8f9fa; }
+        .blend-table .blend-recipe {
+            font-family: 'Consolas', monospace;
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.88em;
+        }
+        .blend-table .uplift {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85em;
+        }
+
+        .summary-section {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+        }
+        .summary-section h3 { margin-bottom: 15px; font-size: 1.3em; }
+        .summary-item {
+            background: rgba(255,255,255,0.2);
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .qr-section { text-align: center; padding: 30px; }
+        .qr-section img {
+            border: 3px solid #eee;
+            border-radius: 15px;
+            padding: 10px;
+            background: white;
+            max-width: 250px;
+        }
+        .qr-section p { margin-top: 15px; color: #666; }
+
+        .pipeline-note {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 14px 18px;
+            margin: 14px 0 4px 0;
+            border-radius: 0 10px 10px 0;
+            color: #1565c0;
+            font-size: 0.92em;
+            line-height: 1.55;
+        }
+        .pipeline-note code {
+            background: rgba(33, 150, 243, 0.12);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.92em;
+        }
+        .pipeline-note.warning {
+            background: #fff8e1;
+            border-left-color: #ff9800;
+            color: #e65100;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header { padding: 20px 15px; padding-top: 70px; }
+            .header-logo { top: 10px; right: 10px; max-height: 50px; max-width: 100px; }
+            .header h1 { font-size: 1.4em; }
+            .header .subtitle { font-size: 0.92em; }
+            .stats-row { gap: 10px; }
+            .stat-box { padding: 10px 20px; min-width: 80px; }
+            .stat-box .number { font-size: 1.5em; }
+            .stat-box .label { font-size: 0.8em; }
+            .card { padding: 15px; }
+            .card h2 { font-size: 1.15em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="peprich_logo.jpg" alt="Peprich Logo" class="header-logo"
+                 onerror="this.onerror=null; this.src='../Peprich 로고 01.jpg';">
+            <h1>균주 맞춤 펩톤 추천 리포트</h1>
+            <p class="subtitle">PeptoMatch × Growth Curve App · Integrated Strain–Peptone Matching</p>
+            <div class="demo-banner">※ 본 리포트는 플랫폼 데모용 예시이며, 일부 수치는 시연 목적의 가상 데이터입니다</div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="number">22</div>
+                    <div class="label">분석 균주 (GEM)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number">16</div>
+                    <div class="label">Sempio 후보 펩톤</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number">89</div>
+                    <div class="label">조성 Feature</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number">R² 0.74</div>
+                    <div class="label">FBA vs 실측</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. 통합 파이프라인 안내 -->
+        <div class="card">
+            <h2>통합 분석 파이프라인 <span class="badge-soft">Genome × GEM × 실측</span></h2>
+            <div class="pipeline-note">
+                PeptoMatch는 <strong>① 유전체 기반 demand</strong> (NCBI genome → KO annotation),
+                <strong>② 펩톤 조성 기반 supply</strong> (자사 53종 × 89 features),
+                <strong>③ GEM 기반 FBA 시뮬레이션</strong> (gapseq SBML 22종) 세 축을
+                Match Score로 통합하고, <code>Growth Curve App</code>에서 적재되는 실측 OD/μ로
+                ML 보정(Ridge → GP → XGBoost)을 점진 적용합니다.
+            </div>
+            <div class="pipeline-note warning">
+                실측 데이터 누적 단계 — 본 리포트 ⑤번 섹션의 FBA vs 실측 검증은 시연용 가상 분포이며,
+                플랫폼 가동 후 자동으로 실측 데이터로 갱신됩니다.
+            </div>
+        </div>
+
+        <!-- 2. 분석 균주 프로파일 -->
+        <div class="card">
+            <h2>분석 균주 프로파일 <span class="badge-soft">Genome demand</span></h2>
+            <div class="strain-grid">
+                <div class="strain-card">
+                    <span class="code">LP</span>
+                    <div class="name">L. plantarum</div>
+                    <div class="media">권장 배지: MRS_rich · GEM: ✅</div>
+                    <div class="demand-row">
+                        <span class="demand-label">Branched-chain AA</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:88%"></span></span><span class="demand-val">0.88</span></span>
+                    </div>
+                    <div class="demand-row">
+                        <span class="demand-label">Aromatic AA</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:72%"></span></span><span class="demand-val">0.72</span></span>
+                    </div>
+                    <div class="demand-row">
+                        <span class="demand-label">Vitamin B군</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:64%"></span></span><span class="demand-val">0.64</span></span>
+                    </div>
+                    <div class="demand-row">
+                        <span class="demand-label">Nucleotide</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:55%"></span></span><span class="demand-val">0.55</span></span>
+                    </div>
+                    <div class="top-pick">🥇 Top 추천: <strong>SOY-1</strong> (0.913) — BCAA·peptide MW 분포 일치</div>
+                </div>
+
+                <div class="strain-card">
+                    <span class="code">BS</span>
+                    <div class="name">B. subtilis</div>
+                    <div class="media">권장 배지: LB_rich · GEM: ✅</div>
+                    <div class="demand-row">
+                        <span class="demand-label">Glu·Gln 공급</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:92%"></span></span><span class="demand-val">0.92</span></span>
+                    </div>
+                    <div class="demand-row">
+                        <span class="demand-label">Sulfur AA (Met·Cys)</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:78%"></span></span><span class="demand-val">0.78</span></span>
+                    </div>
+                    <div class="demand-row">
+                        <span class="demand-label">FAA abundance</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:81%"></span></span><span class="demand-val">0.81</span></span>
+                    </div>
+                    <div class="demand-row">
+                        <span class="demand-label">Vitamin B군</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:48%"></span></span><span class="demand-val">0.48</span></span>
+                    </div>
+                    <div class="top-pick">🥇 Top 추천: <strong>SOY-P</strong> (0.894) — pyro/γ-Glu 실측 + 고 FAA</div>
+                </div>
+
+                <div class="strain-card">
+                    <span class="code">BFL</span>
+                    <div class="name">B. longum</div>
+                    <div class="media">권장 배지: MRS_rich (Cys 보강)· GEM: ✅</div>
+                    <div class="demand-row">
+                        <span class="demand-label">Cysteine demand</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:95%"></span></span><span class="demand-val">0.95</span></span>
+                    </div>
+                    <div class="demand-row">
+                        <span class="demand-label">Vitamin B (Riboflavin·Folate)</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:84%"></span></span><span class="demand-val">0.84</span></span>
+                    </div>
+                    <div class="demand-row">
+                        <span class="demand-label">Nucleotide salvage</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:79%"></span></span><span class="demand-val">0.79</span></span>
+                    </div>
+                    <div class="demand-row">
+                        <span class="demand-label">Low-MW peptide</span>
+                        <span><span class="bar-track"><span class="bar-fill" style="width:71%"></span></span><span class="demand-val">0.71</span></span>
+                    </div>
+                    <div class="top-pick">🥇 Top 추천: <strong>SOY-N+</strong> (0.881) — Vitamin B + 저분자 펩타이드</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Top 펩톤 추천 랭킹 -->
+        <div class="card">
+            <h2>Top 펩톤 추천 랭킹 <span class="badge-soft">Match Score (Sempio 16종)</span></h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div id="chart_rank_lp"></div>
+                </div>
+                <div class="chart-container">
+                    <div id="chart_rank_bs"></div>
+                </div>
+            </div>
+            <div class="charts-grid" style="grid-template-columns: 1fr; margin-top: 20px;">
+                <div class="chart-container">
+                    <div id="chart_rank_bfl"></div>
+                </div>
+            </div>
+            <div class="reason-list">
+                <div class="reason-item"><span class="strain-tag">LP</span><span class="pep-tag">SOY-1</span> · Branched-chain AA·peptide MW 분포 일치, FAA 정량 충족</div>
+                <div class="reason-item"><span class="strain-tag">LP</span><span class="pep-tag">SOY-N+</span> · 저분자 펩타이드 ↑, Vitamin B군 보강 효과</div>
+                <div class="reason-item"><span class="strain-tag">BS</span><span class="pep-tag">SOY-P</span> · pyro-Glu / γ-Glu 실측 함량 ↑ (Glu·Gln 수송 강화)</div>
+                <div class="reason-item"><span class="strain-tag">BS</span><span class="pep-tag">SOY-BIO</span> · 고 FAA + Sulfur AA 균형, LB 대비 OD↑</div>
+                <div class="reason-item"><span class="strain-tag">BFL</span><span class="pep-tag">SOY-N+</span> · 저분자 펩타이드 + Vitamin B (Riboflavin·Folate)</div>
+                <div class="reason-item"><span class="strain-tag">BFL</span><span class="pep-tag">SOY-BIO N50</span> · Cysteine 보강 + 뉴클레오티드 supply</div>
+            </div>
+        </div>
+
+        <!-- 4. 매칭 히트맵 -->
+        <div class="card">
+            <h2>균주 × 펩톤 매칭 히트맵 <span class="badge-soft">Composition × Demand</span></h2>
+            <div class="chart-container" style="min-height: 520px;">
+                <div id="chart_heatmap"></div>
+            </div>
+        </div>
+
+        <!-- 5. FBA 예측 vs 실측 -->
+        <div class="card">
+            <h2>FBA 예측 μ vs 실측 OD <span class="badge-soft">Cross-validation</span></h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div id="chart_fba_scatter"></div>
+                </div>
+                <div class="chart-container">
+                    <div id="chart_growth_curves"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. 블렌딩 최적화 -->
+        <div class="card">
+            <h2>펩톤 블렌딩 최적화 <span class="badge-soft">Blend Optimizer</span></h2>
+            <div class="chart-container" style="min-height: 380px;">
+                <div id="chart_blend"></div>
+            </div>
+            <table class="blend-table">
+                <thead>
+                    <tr>
+                        <th>균주</th>
+                        <th>단일 (Top-1)</th>
+                        <th>블렌딩 레시피</th>
+                        <th>예측 μ_max (1/h)</th>
+                        <th>vs 단일</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span style="font-family: Consolas; background:#2c3e50; color:white; padding:2px 8px; border-radius:6px;">LP</span> <em>L. plantarum</em></td>
+                        <td>SOY-1 (0.42)</td>
+                        <td><span class="blend-recipe">1_75%+P_25%</span></td>
+                        <td><strong>0.51</strong></td>
+                        <td><span class="uplift">+21.4%</span></td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family: Consolas; background:#2c3e50; color:white; padding:2px 8px; border-radius:6px;">BS</span> <em>B. subtilis</em></td>
+                        <td>SOY-P (0.58)</td>
+                        <td><span class="blend-recipe">SP_60%+B_40%</span></td>
+                        <td><strong>0.66</strong></td>
+                        <td><span class="uplift">+13.8%</span></td>
+                    </tr>
+                    <tr>
+                        <td><span style="font-family: Consolas; background:#2c3e50; color:white; padding:2px 8px; border-radius:6px;">BFL</span> <em>B. longum</em></td>
+                        <td>SOY-N+ (0.31)</td>
+                        <td><span class="blend-recipe">N_70%+R_30%</span></td>
+                        <td><strong>0.39</strong></td>
+                        <td><span class="uplift">+25.8%</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 7. 요약 인사이트 -->
+        <div class="card">
+            <h2>핵심 인사이트</h2>
+            <div class="summary-section">
+                <h3>📌 PeptoMatch 추천 요약</h3>
+                <div class="summary-item">
+                    <strong>① Lactobacillus 계열</strong> — SOY-1 / SOY-N+ 단일 추천이 안정적이며,
+                    PEA-1 25% 블렌딩 시 평균 +18% μ 상승. BCAA·peptide MW 분포가 핵심 결정 요인.
+                </div>
+                <div class="summary-item">
+                    <strong>② Bacillus 계열</strong> — Glu·Gln demand 가 매우 높아 SOY-P (pyro/γ-Glu 함량↑)
+                    가 단일 1순위. SOY-BIO 40% 블렌딩이 Sulfur AA 보강 효과로 추가 uplift 유도.
+                </div>
+                <div class="summary-item">
+                    <strong>③ Bifidobacterium 계열</strong> — Cysteine 결손 + Vitamin B 의존성 강함.
+                    SOY-N+ + RICE-1 30% 블렌딩이 Sempio 라인업 내 최적 조합. 향후 Cys 보강 변형 펩톤 검증 권장.
+                </div>
+                <div class="summary-item">
+                    <strong>④ FBA vs 실측</strong> — Spearman ρ = 0.78, R² = 0.74 — 22종 GEM 기반
+                    예측이 상업 펩톤 비교 대비 평균 OD <strong>+15% 향상</strong> 시그널을 일관되게 포착.
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. QR -->
+        <div class="card">
+            <h2>QR 코드로 리포트 공유</h2>
+            <div class="qr-section">
+                <img src="growth_peptomatch_qr_code.png" alt="QR Code">
+                <p>PC 또는 모바일에서 QR 코드를 스캔하여 리포트를 확인하세요.</p>
+                <p style="color: #27ae60; font-size: 0.9em;">QR 코드 링크: <a id="qr-link" href="https://kimyongjin6379-blip.github.io/peptomatch-recommendation-demo/" target="_blank" style="color: #3498db;">https://kimyongjin6379-blip.github.io/peptomatch-recommendation-demo/</a></p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Generated: 2026-05-04</p>
+            <p>PeptoMatch Recommendation System · Sempio Foods Company</p>
+        </div>
+    </div>
+
+    <script>
+    // ============== 가상 데이터 ==============
+    const PEPS = ['SOY-1','SOY-N+','SOY-L','SOY-P','SOY-BIO','SOY-BIO N50','WHEAT-1','WHEAT-BIO','PEA-1','PEA-BIO','RICE-1','RICE-BIO','PPR Type2','PPR Type3','PPR Type4','Fish Collagen'];
+    const STRAINS = ['LP','BS','BFL','LR','LA','EF','LL','BFB'];
+
+    function rankBar(divId, strainCode, scores, color, title){
+        const idx = Array.from(scores.keys()).sort((a,b)=>scores[b]-scores[a]).slice(0,10);
+        const labels = idx.map(i=>PEPS[i]);
+        const vals = idx.map(i=>scores[i]);
+        const colors = labels.map(l => (l.startsWith('SOY')||l.startsWith('WHEAT')||l.startsWith('PEA')||l.startsWith('RICE')||l.startsWith('PPR')||l.startsWith('Fish')) ? color : '#bbb');
+        Plotly.newPlot(divId, [{
+            type:'bar', orientation:'h',
+            x: vals.reverse(), y: labels.reverse(),
+            marker:{color: colors.reverse()},
+            hovertemplate:'<b>%{y}</b><br>Score: %{x:.3f}<extra></extra>',
+            text: vals.map(v=>v.toFixed(3)), textposition:'outside'
+        }],{
+            title: title,
+            margin:{l:130,r:60,t:50,b:40},
+            xaxis:{title:'Match Score', range:[0, Math.max(...vals)*1.15]},
+            yaxis:{automargin:true},
+            height: 420,
+            paper_bgcolor:'white', plot_bgcolor:'white'
+        }, {responsive:true, displaylogo:false});
+    }
+
+    rankBar('chart_rank_lp','LP',
+        [0.913,0.872,0.704,0.681,0.652,0.598,0.541,0.512,0.795,0.726,0.488,0.452,0.392,0.378,0.355,0.301],
+        '#667eea','LP · L. plantarum');
+
+    rankBar('chart_rank_bs','BS',
+        [0.612,0.638,0.561,0.894,0.842,0.778,0.582,0.554,0.498,0.475,0.421,0.408,0.512,0.499,0.483,0.367],
+        '#11998e','BS · B. subtilis');
+
+    rankBar('chart_rank_bfl','BFL',
+        [0.642,0.881,0.612,0.586,0.722,0.838,0.471,0.452,0.539,0.521,0.685,0.612,0.382,0.371,0.359,0.298],
+        '#f093fb','BFL · B. longum');
+
+    // ============== 히트맵 ==============
+    const HEAT_STRAINS = ['LP','LR','LA','LC','BS','BC','EC','EF','BFL','BFB','LL','STT'];
+    const HEAT_PEPS = ['SOY-1','SOY-N+','SOY-L','SOY-P','SOY-BIO','SOY-BIO N50','WHEAT-1','PEA-1','RICE-1','PPR Type4','Fish Collagen'];
+    const HEAT_DATA = [
+        [0.91,0.87,0.70,0.68,0.65,0.60,0.54,0.80,0.49,0.36,0.30],
+        [0.88,0.85,0.72,0.66,0.63,0.61,0.52,0.77,0.51,0.34,0.31],
+        [0.84,0.81,0.74,0.62,0.59,0.55,0.49,0.71,0.46,0.31,0.28],
+        [0.79,0.83,0.71,0.69,0.61,0.57,0.51,0.74,0.45,0.33,0.29],
+        [0.61,0.64,0.56,0.89,0.84,0.78,0.58,0.50,0.42,0.48,0.37],
+        [0.59,0.62,0.55,0.86,0.81,0.74,0.61,0.48,0.44,0.46,0.34],
+        [0.65,0.59,0.58,0.71,0.68,0.62,0.69,0.52,0.51,0.42,0.38],
+        [0.71,0.69,0.63,0.74,0.66,0.60,0.55,0.58,0.47,0.51,0.40],
+        [0.64,0.88,0.61,0.59,0.72,0.84,0.47,0.54,0.69,0.36,0.30],
+        [0.62,0.85,0.59,0.57,0.70,0.81,0.45,0.52,0.67,0.34,0.29],
+        [0.81,0.78,0.69,0.64,0.60,0.58,0.53,0.71,0.49,0.39,0.33],
+        [0.74,0.71,0.65,0.61,0.58,0.54,0.50,0.66,0.48,0.36,0.31]
+    ];
+    Plotly.newPlot('chart_heatmap',[{
+        type:'heatmap',
+        z: HEAT_DATA, x: HEAT_PEPS, y: HEAT_STRAINS,
+        colorscale:[[0,'#f3e5f5'],[0.4,'#9575cd'],[0.7,'#5e35b1'],[1,'#311b92']],
+        zmin:0.25, zmax:0.95,
+        hovertemplate:'%{y} × %{x}<br>Score: %{z:.2f}<extra></extra>',
+        colorbar:{title:'Match Score'}
+    }],{
+        margin:{l:60,r:60,t:30,b:120},
+        xaxis:{tickangle:-30, automargin:true},
+        yaxis:{automargin:true},
+        height: 500,
+        paper_bgcolor:'white', plot_bgcolor:'white'
+    },{responsive:true, displaylogo:false});
+
+    // ============== FBA 산점도 ==============
+    const FBA_PRED = [0.42,0.51,0.39,0.58,0.66,0.31,0.39,0.45,0.52,0.36,0.48,0.62,0.71,0.28,0.34,0.55,0.41,0.59,0.47,0.33,0.50,0.44];
+    const FBA_OBS  = [0.45,0.48,0.42,0.55,0.69,0.29,0.42,0.41,0.49,0.39,0.51,0.58,0.74,0.31,0.36,0.52,0.44,0.61,0.45,0.35,0.47,0.46];
+    Plotly.newPlot('chart_fba_scatter',[{
+        type:'scatter', mode:'markers',
+        x: FBA_PRED, y: FBA_OBS,
+        marker:{size:10,color:'#667eea',line:{color:'white',width:1.5}},
+        hovertemplate:'Pred μ: %{x:.2f}<br>Obs μ: %{y:.2f}<extra></extra>',
+        name:'Strain × peptone'
+    },{
+        type:'scatter', mode:'lines',
+        x:[0.25,0.78], y:[0.25,0.78],
+        line:{color:'#e74c3c', dash:'dash', width:2},
+        name:'y = x'
+    }],{
+        title:'FBA 예측 μ vs 실측 (Spearman ρ = 0.78, R² = 0.74)',
+        xaxis:{title:'FBA-predicted μ_max (1/h)', range:[0.20,0.80]},
+        yaxis:{title:'Observed μ_max (1/h)', range:[0.20,0.80]},
+        margin:{l:60,r:30,t:60,b:50},
+        height: 420,
+        paper_bgcolor:'white', plot_bgcolor:'white',
+        showlegend:true
+    },{responsive:true, displaylogo:false});
+
+    // ============== 성장 곡선 (Growth Curve App 시뮬) ==============
+    const T = Array.from({length:48}, (_,i)=>i*0.5);
+    function growth(t, mu, k){ return 0.05 + (k-0.05)/(1+Math.exp(-mu*(t-12))); }
+    Plotly.newPlot('chart_growth_curves',[
+        {type:'scatter',mode:'lines',name:'SOY-P (Top)',     x:T, y:T.map(t=>growth(t,0.66,1.85)), line:{color:'#11998e',width:3}},
+        {type:'scatter',mode:'lines',name:'SOY-BIO',        x:T, y:T.map(t=>growth(t,0.58,1.62)), line:{color:'#38ef7d',width:2}},
+        {type:'scatter',mode:'lines',name:'WHEAT-1',        x:T, y:T.map(t=>growth(t,0.42,1.18)), line:{color:'#f093fb',width:2}},
+        {type:'scatter',mode:'lines',name:'LB control',     x:T, y:T.map(t=>growth(t,0.36,0.92)), line:{color:'#bbb',width:2,dash:'dot'}}
+    ],{
+        title:'BS · B. subtilis 펩톤별 성장 곡선 (시연)',
+        xaxis:{title:'Time (h)'},
+        yaxis:{title:'OD₆₀₀'},
+        margin:{l:60,r:30,t:60,b:50},
+        height: 420,
+        paper_bgcolor:'white', plot_bgcolor:'white'
+    },{responsive:true, displaylogo:false});
+
+    // ============== 블렌딩 ==============
+    Plotly.newPlot('chart_blend',[
+        {type:'bar',name:'단일 (Top-1)',
+         x:['LP','BS','BFL','LR','LA'], y:[0.42,0.58,0.31,0.39,0.36],
+         marker:{color:'#bbb'}, text:['SOY-1','SOY-P','SOY-N+','SOY-1','SOY-1'], textposition:'outside'},
+        {type:'bar',name:'블렌딩 (최적)',
+         x:['LP','BS','BFL','LR','LA'], y:[0.51,0.66,0.39,0.46,0.43],
+         marker:{color:'#667eea'},
+         text:['1_75%+P_25%','SP_60%+B_40%','N_70%+R_30%','1_70%+P_30%','1_80%+N_20%'],
+         textposition:'outside'}
+    ],{
+        title:'펩톤 블렌딩 최적화 — 단일 vs 최적 블렌드 (예측 μ_max)',
+        barmode:'group',
+        xaxis:{title:'균주'}, yaxis:{title:'μ_max (1/h)', range:[0,0.85]},
+        margin:{l:60,r:30,t:60,b:60},
+        height: 380,
+        paper_bgcolor:'white', plot_bgcolor:'white'
+    },{responsive:true, displaylogo:false});
+    </script>
+</body>
+</html>
