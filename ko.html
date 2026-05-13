@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strain-Specific Peptone Recommendation Report · PeptoMatch × Growth Curve</title>
+    <title>균주 맞춤 펩톤 추천 리포트 · PeptoMatch × Growth Curve</title>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -53,7 +53,7 @@
         .lang-toggle a.active { background: #667eea; color: white; }
         .lang-toggle a:hover { background: #eef2ff; }
         .lang-toggle a.active:hover { opacity: 0.9; }
-        .header h1 { color: #2c3e50; font-size: 2.1em; margin-bottom: 10px; }
+        .header h1 { color: #2c3e50; font-size: 2.3em; margin-bottom: 10px; }
         .header .subtitle { color: #7f8c8d; font-size: 1.05em; }
 
         .demo-banner {
@@ -310,7 +310,7 @@
             .header-logo { top: 10px; right: 10px; max-height: 50px; max-width: 100px; }
             .lang-toggle { top: 12px; left: 12px; }
             .lang-toggle a { padding: 3px 9px; font-size: 0.72em; }
-            .header h1 { font-size: 1.35em; }
+            .header h1 { font-size: 1.4em; }
             .header .subtitle { font-size: 0.92em; }
             .stats-row { gap: 10px; }
             .stat-box { padding: 10px 20px; min-width: 80px; }
@@ -325,60 +325,58 @@
     <div class="container">
         <div class="header">
             <div class="lang-toggle">
-                <a href="#" class="active">EN</a>
-                <a href="#" onclick="event.preventDefault(); switchToKO();">KO</a>
+                <a href="#" onclick="event.preventDefault(); switchToEN();">EN</a>
+                <a href="#" class="active">한국어</a>
             </div>
             <img src="peprich_logo.jpg" alt="Peprich Logo" class="header-logo"
                  onerror="this.onerror=null; this.src='../Peprich 로고 01.jpg';">
-            <h1>Strain-Specific Peptone Recommendation Report</h1>
+            <h1>균주 맞춤 펩톤 추천 리포트</h1>
             <p class="subtitle">PeptoMatch × Growth Curve App · Integrated Strain–Peptone Matching</p>
-            <div class="demo-banner">※ This report is a platform demonstration; some figures are illustrative.</div>
+            <div class="demo-banner">※ 본 리포트는 플랫폼 데모용 예시이며, 일부 수치는 시연 목적의 가상 데이터입니다</div>
             <div class="stats-row">
                 <div class="stat-box">
                     <div class="number">22</div>
-                    <div class="label">Strains (GEM)</div>
+                    <div class="label">분석 균주 (GEM)</div>
                 </div>
                 <div class="stat-box">
                     <div class="number">16</div>
-                    <div class="label">Sempio Peptones</div>
+                    <div class="label">Sempio 후보 펩톤</div>
                 </div>
                 <div class="stat-box">
                     <div class="number">89</div>
-                    <div class="label">Composition Features</div>
+                    <div class="label">조성 Feature</div>
                 </div>
                 <div class="stat-box">
                     <div class="number">R² 0.74</div>
-                    <div class="label">FBA vs. Observed</div>
+                    <div class="label">FBA vs 실측</div>
                 </div>
             </div>
         </div>
 
-        <!-- 1. Pipeline -->
+        <!-- 1. 통합 파이프라인 안내 -->
         <div class="card">
-            <h2>Integrated Analysis Pipeline <span class="badge-soft">Genome × GEM × Observed</span></h2>
+            <h2>통합 분석 파이프라인 <span class="badge-soft">Genome × GEM × 실측</span></h2>
             <div class="pipeline-note">
-                PeptoMatch integrates three sources into a single Match Score:
-                <strong>① Genome-based demand</strong> (NCBI genome → KO annotation),
-                <strong>② Composition-based supply</strong> (in-house 53-product × 89-feature panel),
-                and <strong>③ GEM-based FBA simulation</strong> (22 gapseq-derived SBML models).
-                Observed OD/μ accumulated through the <code>Growth Curve App</code> then
-                progressively calibrates predictions via ML (Ridge → GP → XGBoost).
+                PeptoMatch는 <strong>① 유전체 기반 demand</strong> (NCBI genome → KO annotation),
+                <strong>② 펩톤 조성 기반 supply</strong> (자사 53종 × 89 features),
+                <strong>③ GEM 기반 FBA 시뮬레이션</strong> (gapseq SBML 22종) 세 축을
+                Match Score로 통합하고, <code>Growth Curve App</code>에서 적재되는 실측 OD/μ로
+                ML 보정(Ridge → GP → XGBoost)을 점진 적용합니다.
             </div>
             <div class="pipeline-note warning">
-                Data-accumulation phase — Section ⑤ (FBA vs. observed) currently uses an
-                illustrative distribution; the platform will auto-refresh it with real
-                measurements once data ingestion is in production.
+                실측 데이터 누적 단계 — 본 리포트 ⑤번 섹션의 FBA vs 실측 검증은 시연용 가상 분포이며,
+                플랫폼 가동 후 자동으로 실측 데이터로 갱신됩니다.
             </div>
         </div>
 
-        <!-- 2. Strain profiles -->
+        <!-- 2. 분석 균주 프로파일 -->
         <div class="card">
-            <h2>Analyzed Strain Profiles <span class="badge-soft">Genome demand</span></h2>
+            <h2>분석 균주 프로파일 <span class="badge-soft">Genome demand</span></h2>
             <div class="strain-grid">
                 <div class="strain-card">
                     <span class="code">LP</span>
                     <div class="name">L. plantarum</div>
-                    <div class="media">Recommended medium: MRS_rich · GEM: ✅</div>
+                    <div class="media">권장 배지: MRS_rich · GEM: ✅</div>
                     <div class="demand-row">
                         <span class="demand-label">Branched-chain AA</span>
                         <span><span class="bar-track"><span class="bar-fill" style="width:88%"></span></span><span class="demand-val">0.88</span></span>
@@ -388,22 +386,22 @@
                         <span><span class="bar-track"><span class="bar-fill" style="width:72%"></span></span><span class="demand-val">0.72</span></span>
                     </div>
                     <div class="demand-row">
-                        <span class="demand-label">Vitamin B group</span>
+                        <span class="demand-label">Vitamin B군</span>
                         <span><span class="bar-track"><span class="bar-fill" style="width:64%"></span></span><span class="demand-val">0.64</span></span>
                     </div>
                     <div class="demand-row">
                         <span class="demand-label">Nucleotide</span>
                         <span><span class="bar-track"><span class="bar-fill" style="width:55%"></span></span><span class="demand-val">0.55</span></span>
                     </div>
-                    <div class="top-pick">🥇 Top pick: <strong>SOY-1</strong> (0.913) — BCAA + peptide MW distribution match</div>
+                    <div class="top-pick">🥇 Top 추천: <strong>SOY-1</strong> (0.913) — BCAA·peptide MW 분포 일치</div>
                 </div>
 
                 <div class="strain-card">
                     <span class="code">BS</span>
                     <div class="name">B. subtilis</div>
-                    <div class="media">Recommended medium: LB_rich · GEM: ✅</div>
+                    <div class="media">권장 배지: LB_rich · GEM: ✅</div>
                     <div class="demand-row">
-                        <span class="demand-label">Glu·Gln supply</span>
+                        <span class="demand-label">Glu·Gln 공급</span>
                         <span><span class="bar-track"><span class="bar-fill" style="width:92%"></span></span><span class="demand-val">0.92</span></span>
                     </div>
                     <div class="demand-row">
@@ -415,16 +413,16 @@
                         <span><span class="bar-track"><span class="bar-fill" style="width:81%"></span></span><span class="demand-val">0.81</span></span>
                     </div>
                     <div class="demand-row">
-                        <span class="demand-label">Vitamin B group</span>
+                        <span class="demand-label">Vitamin B군</span>
                         <span><span class="bar-track"><span class="bar-fill" style="width:48%"></span></span><span class="demand-val">0.48</span></span>
                     </div>
-                    <div class="top-pick">🥇 Top pick: <strong>SOY-P</strong> (0.894) — measured pyro/γ-Glu + high FAA</div>
+                    <div class="top-pick">🥇 Top 추천: <strong>SOY-P</strong> (0.894) — pyro/γ-Glu 실측 + 고 FAA</div>
                 </div>
 
                 <div class="strain-card">
                     <span class="code">BFL</span>
                     <div class="name">B. longum</div>
-                    <div class="media">Recommended medium: MRS_rich (Cys-supplemented) · GEM: ✅</div>
+                    <div class="media">권장 배지: MRS_rich (Cys 보강)· GEM: ✅</div>
                     <div class="demand-row">
                         <span class="demand-label">Cysteine demand</span>
                         <span><span class="bar-track"><span class="bar-fill" style="width:95%"></span></span><span class="demand-val">0.95</span></span>
@@ -441,14 +439,14 @@
                         <span class="demand-label">Low-MW peptide</span>
                         <span><span class="bar-track"><span class="bar-fill" style="width:71%"></span></span><span class="demand-val">0.71</span></span>
                     </div>
-                    <div class="top-pick">🥇 Top pick: <strong>SOY-N+</strong> (0.881) — Vitamin B + low-MW peptides</div>
+                    <div class="top-pick">🥇 Top 추천: <strong>SOY-N+</strong> (0.881) — Vitamin B + 저분자 펩타이드</div>
                 </div>
             </div>
         </div>
 
-        <!-- 3. Ranking -->
+        <!-- 3. Top 펩톤 추천 랭킹 -->
         <div class="card">
-            <h2>Top Peptone Ranking <span class="badge-soft">Match Score (Sempio 16)</span></h2>
+            <h2>Top 펩톤 추천 랭킹 <span class="badge-soft">Match Score (Sempio 16종)</span></h2>
             <div class="charts-grid">
                 <div class="chart-container">
                     <div id="chart_rank_lp"></div>
@@ -463,26 +461,26 @@
                 </div>
             </div>
             <div class="reason-list">
-                <div class="reason-item"><span class="strain-tag">LP</span><span class="pep-tag">SOY-1</span> · BCAA + peptide MW distribution match; sufficient FAA</div>
-                <div class="reason-item"><span class="strain-tag">LP</span><span class="pep-tag">SOY-N+</span> · Higher low-MW peptide fraction; Vitamin B boost</div>
-                <div class="reason-item"><span class="strain-tag">BS</span><span class="pep-tag">SOY-P</span> · Measured pyro-Glu / γ-Glu enrichment (Glu·Gln uptake)</div>
-                <div class="reason-item"><span class="strain-tag">BS</span><span class="pep-tag">SOY-BIO</span> · High FAA + balanced sulfur AA; OD uplift vs. LB</div>
-                <div class="reason-item"><span class="strain-tag">BFL</span><span class="pep-tag">SOY-N+</span> · Low-MW peptide + Vitamin B (Riboflavin·Folate)</div>
-                <div class="reason-item"><span class="strain-tag">BFL</span><span class="pep-tag">SOY-BIO N50</span> · Cysteine supplementation + nucleotide supply</div>
+                <div class="reason-item"><span class="strain-tag">LP</span><span class="pep-tag">SOY-1</span> · Branched-chain AA·peptide MW 분포 일치, FAA 정량 충족</div>
+                <div class="reason-item"><span class="strain-tag">LP</span><span class="pep-tag">SOY-N+</span> · 저분자 펩타이드 ↑, Vitamin B군 보강 효과</div>
+                <div class="reason-item"><span class="strain-tag">BS</span><span class="pep-tag">SOY-P</span> · pyro-Glu / γ-Glu 실측 함량 ↑ (Glu·Gln 수송 강화)</div>
+                <div class="reason-item"><span class="strain-tag">BS</span><span class="pep-tag">SOY-BIO</span> · 고 FAA + Sulfur AA 균형, LB 대비 OD↑</div>
+                <div class="reason-item"><span class="strain-tag">BFL</span><span class="pep-tag">SOY-N+</span> · 저분자 펩타이드 + Vitamin B (Riboflavin·Folate)</div>
+                <div class="reason-item"><span class="strain-tag">BFL</span><span class="pep-tag">SOY-BIO N50</span> · Cysteine 보강 + 뉴클레오티드 supply</div>
             </div>
         </div>
 
-        <!-- 4. Heatmap -->
+        <!-- 4. 매칭 히트맵 -->
         <div class="card">
-            <h2>Strain × Peptone Match Heatmap <span class="badge-soft">Composition × Demand</span></h2>
+            <h2>균주 × 펩톤 매칭 히트맵 <span class="badge-soft">Composition × Demand</span></h2>
             <div class="chart-container" style="min-height: 520px;">
                 <div id="chart_heatmap"></div>
             </div>
         </div>
 
-        <!-- 5. FBA vs Observed -->
+        <!-- 5. FBA 예측 vs 실측 -->
         <div class="card">
-            <h2>FBA-predicted μ vs. Observed OD <span class="badge-soft">Cross-validation</span></h2>
+            <h2>FBA 예측 μ vs 실측 OD <span class="badge-soft">Cross-validation</span></h2>
             <div class="charts-grid">
                 <div class="chart-container">
                     <div id="chart_fba_scatter"></div>
@@ -493,20 +491,20 @@
             </div>
         </div>
 
-        <!-- 6. Blending -->
+        <!-- 6. 블렌딩 최적화 -->
         <div class="card">
-            <h2>Peptone Blend Optimization <span class="badge-soft">Blend Optimizer</span></h2>
+            <h2>펩톤 블렌딩 최적화 <span class="badge-soft">Blend Optimizer</span></h2>
             <div class="chart-container" style="min-height: 380px;">
                 <div id="chart_blend"></div>
             </div>
             <table class="blend-table">
                 <thead>
                     <tr>
-                        <th>Strain</th>
-                        <th>Single (Top-1)</th>
-                        <th>Blend Recipe</th>
-                        <th>Predicted μ_max (1/h)</th>
-                        <th>vs. Single</th>
+                        <th>균주</th>
+                        <th>단일 (Top-1)</th>
+                        <th>블렌딩 레시피</th>
+                        <th>예측 μ_max (1/h)</th>
+                        <th>vs 단일</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -535,41 +533,37 @@
             </table>
         </div>
 
-        <!-- 7. Insights -->
+        <!-- 7. 요약 인사이트 -->
         <div class="card">
-            <h2>Key Insights</h2>
+            <h2>핵심 인사이트</h2>
             <div class="summary-section">
-                <h3>📌 PeptoMatch Recommendation Summary</h3>
+                <h3>📌 PeptoMatch 추천 요약</h3>
                 <div class="summary-item">
-                    <strong>① Lactobacillus group</strong> — Single SOY-1 / SOY-N+ recommendations are stable;
-                    blending with PEA-1 (25%) yields an average +18% μ uplift. BCAA and peptide MW
-                    distribution are the dominant decision factors.
+                    <strong>① Lactobacillus 계열</strong> — SOY-1 / SOY-N+ 단일 추천이 안정적이며,
+                    PEA-1 25% 블렌딩 시 평균 +18% μ 상승. BCAA·peptide MW 분포가 핵심 결정 요인.
                 </div>
                 <div class="summary-item">
-                    <strong>② Bacillus group</strong> — Glu·Gln demand is exceptionally high, making SOY-P
-                    (with high pyro/γ-Glu content) the top single recommendation. A 40% SOY-BIO blend adds
-                    sulfur-AA reinforcement for additional uplift.
+                    <strong>② Bacillus 계열</strong> — Glu·Gln demand 가 매우 높아 SOY-P (pyro/γ-Glu 함량↑)
+                    가 단일 1순위. SOY-BIO 40% 블렌딩이 Sulfur AA 보강 효과로 추가 uplift 유도.
                 </div>
                 <div class="summary-item">
-                    <strong>③ Bifidobacterium group</strong> — Strong cysteine deficiency + vitamin-B dependency.
-                    Within the Sempio lineup, SOY-N+ + RICE-1 (30%) is the optimal combination. Future Cys-fortified
-                    peptone variants are recommended for further validation.
+                    <strong>③ Bifidobacterium 계열</strong> — Cysteine 결손 + Vitamin B 의존성 강함.
+                    SOY-N+ + RICE-1 30% 블렌딩이 Sempio 라인업 내 최적 조합. 향후 Cys 보강 변형 펩톤 검증 권장.
                 </div>
                 <div class="summary-item">
-                    <strong>④ FBA vs. Observed</strong> — Spearman ρ = 0.78, R² = 0.74 — predictions
-                    derived from 22 GEMs consistently capture a <strong>+15% average OD uplift</strong>
-                    over commercial reference peptones.
+                    <strong>④ FBA vs 실측</strong> — Spearman ρ = 0.78, R² = 0.74 — 22종 GEM 기반
+                    예측이 상업 펩톤 비교 대비 평균 OD <strong>+15% 향상</strong> 시그널을 일관되게 포착.
                 </div>
             </div>
         </div>
 
         <!-- 8. QR -->
         <div class="card">
-            <h2>Share Report via QR Code</h2>
+            <h2>QR 코드로 리포트 공유</h2>
             <div class="qr-section">
                 <img src="growth_peptomatch_qr_code.png" alt="QR Code">
-                <p>Scan this QR code with PC or mobile to open the report.</p>
-                <p style="color: #27ae60; font-size: 0.9em;">QR link: <a id="qr-link" href="https://kimyongjin6379-blip.github.io/peptomatch-recommendation-demo/" target="_blank" style="color: #3498db;">https://kimyongjin6379-blip.github.io/peptomatch-recommendation-demo/</a></p>
+                <p>PC 또는 모바일에서 QR 코드를 스캔하여 리포트를 확인하세요.</p>
+                <p style="color: #27ae60; font-size: 0.9em;">QR 코드 링크: <a id="qr-link" href="https://kimyongjin6379-blip.github.io/peptomatch-recommendation-demo/" target="_blank" style="color: #3498db;">https://kimyongjin6379-blip.github.io/peptomatch-recommendation-demo/</a></p>
             </div>
         </div>
 
@@ -580,8 +574,9 @@
     </div>
 
     <script>
-    // ============== Demonstration data ==============
+    // ============== 가상 데이터 ==============
     const PEPS = ['SOY-1','SOY-N+','SOY-L','SOY-P','SOY-BIO','SOY-BIO N50','WHEAT-1','WHEAT-BIO','PEA-1','PEA-BIO','RICE-1','RICE-BIO','PPR Type2','PPR Type3','PPR Type4','Fish Collagen'];
+    const STRAINS = ['LP','BS','BFL','LR','LA','EF','LL','BFB'];
 
     function rankBar(divId, strainCode, scores, color, title){
         const idx = Array.from(scores.keys()).sort((a,b)=>scores[b]-scores[a]).slice(0,10);
@@ -616,7 +611,7 @@
         [0.642,0.881,0.612,0.586,0.722,0.838,0.471,0.452,0.539,0.521,0.685,0.612,0.382,0.371,0.359,0.298],
         '#f093fb','BFL · B. longum');
 
-    // ============== Heatmap ==============
+    // ============== 히트맵 ==============
     const HEAT_STRAINS = ['LP','LR','LA','LC','BS','BC','EC','EF','BFL','BFB','LL','STT'];
     const HEAT_PEPS = ['SOY-1','SOY-N+','SOY-L','SOY-P','SOY-BIO','SOY-BIO N50','WHEAT-1','PEA-1','RICE-1','PPR Type4','Fish Collagen'];
     const HEAT_DATA = [
@@ -648,7 +643,7 @@
         paper_bgcolor:'white', plot_bgcolor:'white'
     },{responsive:true, displaylogo:false});
 
-    // ============== FBA scatter ==============
+    // ============== FBA 산점도 ==============
     const FBA_PRED = [0.42,0.51,0.39,0.58,0.66,0.31,0.39,0.45,0.52,0.36,0.48,0.62,0.71,0.28,0.34,0.55,0.41,0.59,0.47,0.33,0.50,0.44];
     const FBA_OBS  = [0.45,0.48,0.42,0.55,0.69,0.29,0.42,0.41,0.49,0.39,0.51,0.58,0.74,0.31,0.36,0.52,0.44,0.61,0.45,0.35,0.47,0.46];
     Plotly.newPlot('chart_fba_scatter',[{
@@ -663,7 +658,7 @@
         line:{color:'#e74c3c', dash:'dash', width:2},
         name:'y = x'
     }],{
-        title:'FBA-predicted μ vs. observed (Spearman ρ = 0.78, R² = 0.74)',
+        title:'FBA 예측 μ vs 실측 (Spearman ρ = 0.78, R² = 0.74)',
         xaxis:{title:'FBA-predicted μ_max (1/h)', range:[0.20,0.80]},
         yaxis:{title:'Observed μ_max (1/h)', range:[0.20,0.80]},
         margin:{l:60,r:30,t:60,b:50},
@@ -672,7 +667,7 @@
         showlegend:true
     },{responsive:true, displaylogo:false});
 
-    // ============== Growth curves ==============
+    // ============== 성장 곡선 (Growth Curve App 시뮬) ==============
     const T = Array.from({length:48}, (_,i)=>i*0.5);
     function growth(t, mu, k){ return 0.05 + (k-0.05)/(1+Math.exp(-mu*(t-12))); }
     Plotly.newPlot('chart_growth_curves',[
@@ -681,7 +676,7 @@
         {type:'scatter',mode:'lines',name:'WHEAT-1',        x:T, y:T.map(t=>growth(t,0.42,1.18)), line:{color:'#f093fb',width:2}},
         {type:'scatter',mode:'lines',name:'LB control',     x:T, y:T.map(t=>growth(t,0.36,0.92)), line:{color:'#bbb',width:2,dash:'dot'}}
     ],{
-        title:'BS · B. subtilis growth curves by peptone (illustrative)',
+        title:'BS · B. subtilis 펩톤별 성장 곡선 (시연)',
         xaxis:{title:'Time (h)'},
         yaxis:{title:'OD₆₀₀'},
         margin:{l:60,r:30,t:60,b:50},
@@ -689,20 +684,20 @@
         paper_bgcolor:'white', plot_bgcolor:'white'
     },{responsive:true, displaylogo:false});
 
-    // ============== Blending ==============
+    // ============== 블렌딩 ==============
     Plotly.newPlot('chart_blend',[
-        {type:'bar',name:'Single (Top-1)',
+        {type:'bar',name:'단일 (Top-1)',
          x:['LP','BS','BFL','LR','LA'], y:[0.42,0.58,0.31,0.39,0.36],
          marker:{color:'#bbb'}, text:['SOY-1','SOY-P','SOY-N+','SOY-1','SOY-1'], textposition:'outside'},
-        {type:'bar',name:'Optimal blend',
+        {type:'bar',name:'블렌딩 (최적)',
          x:['LP','BS','BFL','LR','LA'], y:[0.51,0.66,0.39,0.46,0.43],
          marker:{color:'#667eea'},
          text:['1_75%+P_25%','SP_60%+B_40%','N_70%+R_30%','1_70%+P_30%','1_80%+N_20%'],
          textposition:'outside'}
     ],{
-        title:'Blend optimization — single vs. optimal blend (predicted μ_max)',
+        title:'펩톤 블렌딩 최적화 — 단일 vs 최적 블렌드 (예측 μ_max)',
         barmode:'group',
-        xaxis:{title:'Strain'}, yaxis:{title:'μ_max (1/h)', range:[0,0.85]},
+        xaxis:{title:'균주'}, yaxis:{title:'μ_max (1/h)', range:[0,0.85]},
         margin:{l:60,r:30,t:60,b:60},
         height: 380,
         paper_bgcolor:'white', plot_bgcolor:'white'
